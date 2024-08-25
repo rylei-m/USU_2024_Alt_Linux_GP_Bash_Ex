@@ -1,4 +1,4 @@
-# USU_2024_Alt_Linux_GP_Bash_Ex
+# USU - Editing Example for ./gp_install Shell Script to Add Alternative Linux Distributions
 
 Bash Script example for Editing ./gp_install.sh to Add Unsupported Linux Distributions
 
