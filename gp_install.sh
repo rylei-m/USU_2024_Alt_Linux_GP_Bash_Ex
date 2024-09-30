@@ -20,7 +20,7 @@ fi
 
 if [ $ID == "ubuntu" ]; then
     linux_ver=${VERSION_ID:0:2}
-elif [[ $ID == "rhel" || $ID == "centos" ]]; then
+elif [[ $ID == "rhel" || $ID == "centos" || $ID == "fedora" ]]; then
     linux_ver=${VERSION_ID:0:1}
 fi
 
