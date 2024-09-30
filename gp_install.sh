@@ -9,7 +9,7 @@ if [ $# -gt 0 ]; then
         --arm)
             cmd_type="arm";;
         --help)
-            ;&
+	    ;&
         *)
             cmd_type="usage";;
     esac
@@ -20,8 +20,13 @@ fi
 
 if [ $ID == "ubuntu" ]; then
     linux_ver=${VERSION_ID:0:2}
-elif [[ $ID == "rhel" || $ID == "centos" || $ID == "fedora" ]]; then # Add your version here (ex:  $ID == "fedora" )
+elif [[ $ID == "rhel" || $ID == "centos" ]]; then
     linux_ver=${VERSION_ID:0:1}
+fi
+
+# Install resolvconf on Ubuntu only
+if [ $ID == "ubuntu" ]; then
+    sudo apt-get install -y resolvconf > /dev/null
 fi
 
 case $cmd_type in
@@ -35,33 +40,33 @@ case $cmd_type in
                     16)
                         ;&
                     18)
-                        apt-get install ./GlobalProtect_deb-*.deb;;
+                        sudo -E apt-get install -y ./GlobalProtect_deb-*.deb;;
                      *)
-                        apt-get install ./GlobalProtect_focal_deb-*.deb;;
-                esac
+                        sudo -E apt-get install -y ./GlobalProtect_focal_deb-*.deb;;
+	        esac
                 ;;
             rhel)
                 ;&
+            fedora)
+                ;&
             centos)
-                ;& # Add
-            fedora) # Add Distro
                 # Check if old GP package installed
                 yum_output=$(yum list installed | grep globalprotect)
                 if [[ $yum_output == *"globalprotect.x86"* ]]; then
                     echo "Older globalprotect detected...uninstalling..."
-                    yum -y remove globalprotect
+                    sudo yum -y remove globalprotect
                 fi
 
                 case $linux_ver in
                     7)
-                        yum -y install ./GlobalProtect_rpm-*;;
-                    *)
-                        yum -y install ./GlobalProtect_focal_rpm-*;;
+                        sudo -E yum -y install ./GlobalProtect_rpm-*;;
+		    *)
+                        sudo -E yum -y install ./GlobalProtect_focal_rpm-*;;
                 esac
-                ;;
+	        ;;
             *)
                 echo "Error: Unsupported Linux Distro: $ID"
-                exit
+	        exit
                 ;;
         esac
         ;;
@@ -69,40 +74,40 @@ case $cmd_type in
     arm)
         # ARM Install
         case $ID in
-           ubuntu)
+            ubuntu)
                 case $linux_ver in
                     14)
                         ;&
                     16)
                         ;&
                     18)
-                        apt-get install ./GlobalProtect_deb_arm-*.deb;;
-                    *)
-                        apt-get install ./GlobalProtect_focal_deb_arm-*.deb;;
-                esac
+                        sudo -E apt-get install -y ./GlobalProtect_deb_arm*.deb;;
+		    *)
+                        sudo -E apt-get install -y ./GlobalProtect_focal_deb_arm*.deb;;
+	        esac
                 ;;
             rhel)
                 ;&
+            fedora)
+                ;&
             centos)
-                ;& # Add
-            fedora) # Add Distro
                 # Check if old GP package installed
                 yum_output=$(yum list installed | grep globalprotect)
                 if [[ $yum_output == *"globalprotect_arm.x86"* ]]; then
                     echo "Older globalprotect detected...uninstalling..."
-                    yum -y remove globalprotect_arm
+                    sudo yum -y remove globalprotect_arm
                 fi
 
                 case $linux_ver in
                     7)
-                        yum -y install ./GlobalProtect_rpm_arm-*;;
-                    *)
-                        yum -y install ./GlobalProtect_focal_rpm_arm-*;;
-                    esac
-                    ;;
+                        sudo -E yum -y install ./GlobalProtect_rpm_arm*;;
+		    *)
+                        sudo -E yum -y install ./GlobalProtect_focal_rpm_arm*;;
+	            esac
+	            ;;
             *)
                 echo "Error: Unsupported Linux Distro: $ID"
-                exit
+	        exit
                 ;;
         esac
         ;;
@@ -114,60 +119,75 @@ case $cmd_type in
                 case $linux_ver in
                     14)
                         ;&
-                   16)
+                    16)
                         ;&
                     18)
-                        apt-get install ./GlobalProtect_UI_deb-*.deb;;
-                    *)
-                        apt-get install ./GlobalProtect_UI_focal_deb-*.deb;;
-                esac
+                        sudo -E apt-get install -y ./GlobalProtect_UI_deb*.deb;;
+		    20)
+                        sudo apt-get install -y gnome-tweak-tool gnome-shell-extension-top-icons-plus
+                        gnome-extensions enable TopIcons@phocean.net
+                        sudo -E apt-get install -y ./GlobalProtect_UI_focal_deb*.deb
+                        ;;
+		    22)
+                        sudo apt-get install -y gnome-shell-extension-manager gnome-shell-extension-appindicator
+                        sudo -E apt-get install -y ./GlobalProtect_UI_focal_deb*.deb
+			;;
+		    *)
+                        sudo -E apt-get install -y ./GlobalProtect_UI_focal_deb*.deb;;
+	        esac
                 ;;
             rhel)
                 ;&
+            fedora)
+                ;&
             centos)
-                ;& # Add
-            fedora) # Add Distro
                 # Check if old GP package installed
                 yum_output=$(yum list installed | grep globalprotect)
                 if [[ $yum_output == *"globalprotect_UI.x86"* ]]; then
                     echo "Older globalprotect detected...uninstalling..."
-                    yum -y remove globalprotect_UI
+                    sudo yum -y remove globalprotect_UI
                 fi
 
                 # RHEL Package Dependencies
                 if [ "$ID" = "centos" ]; then
-                    yum -y install epel-release
+                    sudo yum -y install epel-release
                 elif [ "$ID" = "rhel" ]; then
                     if [ "$linux_ver" = "7" ]; then
-                        yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+                        sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
                     elif [ "$linux_ver" = "8" ]; then
-                        yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+                        sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
                     elif [ "$linux_ver" = "9" ]; then
-                        yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+                        sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
                     else
                         echo "Error: Unsupported RHEL version: $linux_ver"
-                        exit
+			exit
                     fi
-                # Add you Distro and its dependency as a elif block
-                elif [ "$ID" = "fedora" ]; then
-                    # For Fedora, install required dependencies directly
-                    dnf -y install qt5-qtwebkit wmctrl
-                else
-                    echo "Error: Unrecognized OS: $ID"
-                    exit
                 fi
 
-                echo "yum: Installing Qt5 WebKit and wmctrl..."
-                yum -y install qt5-qtwebkit wmctrl
+                sudo yum -y install qt5-qtwebkit wmctrl
+
+		# Gnome Shell Extensions Install
+                if [ "$ID" = "rhel" ]; then
+                    if [ "$linux_ver" = "8" ]; then
+                        sudo yum -y install gnome-shell-extension-topicons-plus gnome-tweaks
+                        gnome-shell-extension-tool -e TopIcons@phocean.net
+                    elif [ "$linux_ver" = "9" ]; then
+                        sudo yum -y install gnome-shell-extension-top-icons
+                        gnome-extensions enable top-icons@gnome-shell-extensions.gcampax.github.com
+                    fi
+                elif [ "$ID" = "fedora" ]; then
+                    sudo yum -y install gnome-shell-extension-appindicator gnome-tweaks
+                    gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com
+                fi
 
                 # Install
                 case $linux_ver in
-                   7)
-                        yum -y install ./GlobalProtect_UI_rpm-*
+                    7)
+                        sudo -E yum -y install ./GlobalProtect_UI_rpm-*
                         ;;
-                    *)
-                        yum -y install ./GlobalProtect_UI_focal_rpm-*;;
-                esac
+		    *)
+                        sudo -E yum -y install ./GlobalProtect_UI_focal_rpm-*;;
+	        esac
                 ;;
             *)
                 echo "Error: Unsupported Linux Distro: $ID";;
@@ -176,9 +196,31 @@ case $cmd_type in
     usage)
         ;&
     *)
-        echo "Usage: $ sudo ./gp_install [--cli-only | --arm | --help]"
+        echo "Usage: $ ./gp_install [--cli-only | --arm | --help]"
         echo "  --cli-only: CLI Only"
         echo "  --arm:      ARM"
-        echo "  no options: UI"
+        echo "  default:    UI"
+        echo " "
+        echo "Note: Install script will need superuser access"
         ;;
 esac
+
+###############
+##### TBD #####
+###############
+#if [[ $XDG_SESSION_TYPE == "wayland" ]]
+#then
+#    read -p "Do you want to switch from Wayland to X11? " -n 1 -r
+#    echo
+#    if [[ $REPLY =~ ^[Yy]$ ]]
+#        then
+#        # Wayland to X11
+#        if [[ $ID == "ubuntu" ]]
+#	then
+#             sudo sed -i 's/#WaylandEnable=false/WaylandEnable=false\nDefaultSession=gnome-xorg.desktop/' /etc/gdm3/custom.conf
+#	else
+#             sudo sed -i 's/#WaylandEnable=false/WaylandEnable=false\nDefaultSession=gnome-xorg.desktop/' /etc/gdm/custom.conf
+#        fi
+#	echo "Please reboot to use X11 Window Manager."
+#    fi
+#fi
