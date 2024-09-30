@@ -148,7 +148,7 @@ case $cmd_type in
                         echo "Error: Unsupported RHEL version: $linux_ver"
                         exit
                     fi
-                # Add you Distro and its dependency as a elif block
+                # Add your Distro and its dependency as a elif block
                 elif [ "$ID" = "fedora" ]; then
                     # For Fedora, install required dependencies directly
                     dnf -y install qt5-qtwebkit wmctrl
